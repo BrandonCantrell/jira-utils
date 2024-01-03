@@ -10,7 +10,9 @@ import pandas as pd
 import networkx as nx
 
 
-jira = JIRA(server="https://something.atlassian.net", basic_auth=('nope', os.environ.get('jira_token')))
+
+jira = JIRA(server="https://nope.atlassian.net", basic_auth=('nope', os.environ.get('jira_token')))
+
 
 
 
