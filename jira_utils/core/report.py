@@ -15,11 +15,11 @@ def setup_report_parser(parser):
     parser.add_argument("--project")
     parser.add_argument("--labels")
     parser.add_argument("--creator")
-    parser.add_argument("--summary")
     parser.add_argument("--parent")
     parser.add_argument("--assignee")
     parser.add_argument("--start-date")
     parser.add_argument("--end-date")
+    parser.add_argument("--jql", help="Run a raw JQL query (overrides all other filters)")
     parser.add_argument("--format", choices=["json", "csv"], default="json")
     parser.add_argument("--group-by", nargs="*", help="Fields to group by")
     parser.add_argument("--categorize", action="store_true", help="Dynamically categorize issues by keywords")
@@ -36,7 +36,7 @@ def handle_command(args):
     client = JiraClient(config['server'], config['username'], config['token'])
 
     jql_parts = []
-    for k in ["project", "labels", "creator", "summary", "parent", "assignee"]:
+    for k in ["project", "labels", "creator", "parent", "assignee"]:
         v = getattr(args, k)
         if v:
             jql_parts.append(f"{k} = \"{v}\"")
@@ -45,11 +45,13 @@ def handle_command(args):
     if args.end_date:
         jql_parts.append(f'created <= "{args.end_date}"')
 
-    if not jql_parts:
-        print("❌ At least one filter is required.")
+    jql = args.jql or " AND ".join(jql_parts)
+
+    if not jql:
+        print("❌ You must provide a --jql query or at least one filter.")
         return
 
-    issues = client.generic_issue_search(" AND ".join(jql_parts), max_results=args.limit)
+    issues = client.generic_issue_search(jql, max_results=args.limit)
 
     rows, summaries = [], []
     for issue in issues:
