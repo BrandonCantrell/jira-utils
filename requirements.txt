@@ -1,0 +1,5 @@
+jira
+pandas
+matplotlib
+mpld3
+cryptography
